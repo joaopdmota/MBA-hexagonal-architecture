@@ -1,6 +1,7 @@
 package br.com.fullcycle.infrastructure.repositories;
 
 import br.com.fullcycle.domain.DomainEvent;
+import br.com.fullcycle.domain.event.EventId;
 import br.com.fullcycle.domain.event.ticket.Ticket;
 import br.com.fullcycle.domain.event.ticket.TicketId;
 import br.com.fullcycle.domain.event.ticket.TicketRepository;
@@ -13,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -57,6 +59,14 @@ public class TicketDatabaseRepository implements TicketRepository {
     @Override
     public void deleteAll() {
         this.ticketJpaRepository.deleteAll();
+    }
+
+    @Override
+    public List<Ticket> ticketsByEventId(final EventId anEventId) {
+        Objects.requireNonNull(anEventId, "id cannot be null");
+        return this.ticketJpaRepository.findAllByEventId(UUID.fromString(anEventId.value())).stream()
+                .map(TicketEntity::toTicket)
+                .toList();
     }
 
     private Ticket save(Ticket ticket) {
